@@ -6,19 +6,33 @@
                 <img src="../assets/logo.png" alt="" />
             </div>
             <!-- 登录表单 -->
-            <el-form ref="loginFormRef" :model="loginForm" :rules="loginFormRules" class="login_form">
+            <el-form
+                ref="loginFormRef"
+                :model="loginForm"
+                :rules="loginFormRules"
+                class="login_form"
+            >
                 <!-- 用户名 -->
                 <el-form-item prop="username">
-                    <el-input v-model="loginForm.username" prefix-icon="iconfont icon-user"></el-input>
+                    <el-input
+                        v-model="loginForm.username"
+                        prefix-icon="iconfont icon-user"
+                    ></el-input>
                 </el-form-item>
                 <!-- 密码 -->
                 <el-form-item prop="password">
-                    <el-input v-model="loginForm.password" prefix-icon="iconfont icon-3702mima" type="password"></el-input>
+                    <el-input
+                        v-model="loginForm.password"
+                        prefix-icon="iconfont icon-3702mima"
+                        type="password"
+                    ></el-input>
                 </el-form-item>
                 <!-- 按钮 -->
                 <el-form-item class="btns">
-                     <el-button type="primary" @click="login">登录</el-button>
-                     <el-button type="info" @click="resetLoginForm">重置</el-button>
+                    <el-button type="primary" @click="login">登录</el-button>
+                    <el-button type="info" @click="resetLoginForm"
+                        >重置</el-button
+                    >
                 </el-form-item>
             </el-form>
         </div>
@@ -28,43 +42,61 @@
 
 <script>
 export default {
-    data(){
+    data() {
         return {
             // 登录表单数据
-            loginForm:{
-                username:'admin',
-                password:'123456',
+            loginForm: {
+                username: 'admin',
+                password: '123456',
             },
-             loginFormRules: {
+            loginFormRules: {
                 userName: [
-                    { required: true, message: '请输入用户名', trigger: 'blur' },
-                    { min: 3, max: 10, message: '长度在 3 到 10 个字符之间', trigger: 'blur' }
+                    {
+                        required: true,
+                        message: '请输入用户名',
+                        trigger: 'blur',
+                    },
+                    {
+                        min: 3,
+                        max: 10,
+                        message: '长度在 3 到 10 个字符之间',
+                        trigger: 'blur',
+                    },
                 ],
-                password:[
+                password: [
                     { required: true, message: '请输入密码', trigger: 'blur' },
-                    { min: 6, max: 15, message: '长度在 6 到 15 个字符之间', trigger: 'blur' }
-                ]
-            }
+                    {
+                        min: 6,
+                        max: 15,
+                        message: '长度在 6 到 15 个字符之间',
+                        trigger: 'blur',
+                    },
+                ],
+            },
         }
     },
-    methods:{
-         resetLoginForm(){
+    methods: {
+        resetLoginForm() {
             // console.log(this);
             // console.log(this.$refs.loginFormRef);
-            this.$refs.loginFormRef.resetFields();
+            this.$refs.loginFormRef.resetFields()
         },
-        login(){
-            this.$refs.loginFormRef.validate(async valid=>{
-                if(!valid) return; 
-               const {data:res}=await this.$http.post("login",this.loginForm); //await与valid成对使用，用于直接输出数据而非promise
-               if(res.meta.status!==200) return this.$message.error("登录失败");
-               this.$message.success("登录成功"); 
-               window.sessionStorage.setItem("token",res.data.token);
-                this.$router.push("/home")
-            })            
-        }       
-    }
-};
+        login() {
+            this.$refs.loginFormRef.validate(async (valid) => {
+                if (!valid) return
+                const { data: res } = await this.$http.post(
+                    'login',
+                    this.loginForm
+                ) //await与valid成对使用，用于直接输出数据而非promise
+                if (res.meta.status !== 200)
+                    return this.$message.error('登录失败')
+                this.$message.success('登录成功')
+                window.sessionStorage.setItem('token', res.data.token)
+                this.$router.push('/home')
+            })
+        },
+    },
+}
 </script>
 
 <style scoped lang="scss">
@@ -100,14 +132,14 @@ export default {
         background-color: rgb(202, 199, 199);
     }
 }
-.login_form{
+.login_form {
     position: absolute;
     width: 100%;
     bottom: 0;
     padding: 0 30px;
     box-sizing: border-box;
 }
-.btns{
+.btns {
     display: flex;
     justify-content: flex-end;
 }
