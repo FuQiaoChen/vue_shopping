@@ -57,9 +57,9 @@ export default {
                         trigger: 'blur',
                     },
                     {
-                        min: 3,
+                        min: 4,
                         max: 10,
-                        message: '长度在 3 到 10 个字符之间',
+                        message: '长度在 4 到 10 个字符之间',
                         trigger: 'blur',
                     },
                 ],
@@ -84,10 +84,10 @@ export default {
         login() {
             this.$refs.loginFormRef.validate(async (valid) => {
                 if (!valid) return
-                const { data: res } = await this.$http.post(
+                const { data: res } = await this.$http.post(   //把解构出来的data重命名为res
                     'login',
                     this.loginForm
-                ) //await与valid成对使用，用于直接输出数据而非promise
+                ) //await与valid成对使用，用于直接输出数据而非promise,也就就当返回值是promise时就可用它们转换
                 if (res.meta.status !== 200)
                     return this.$message.error('登录失败')
                 this.$message.success('登录成功')
