@@ -65,7 +65,7 @@
                             size="mini"
                             @click="deleteUserById(row)"
                         ></el-button>
-                        <!-- 修改角色按钮 -->
+                        <!-- 分配角色按钮 -->
                         <el-tooltip
                             effect="dark"
                             content="分配角色"
@@ -76,7 +76,7 @@
                                 type="warning"
                                 icon="el-icon-setting"
                                 size="mini"
-                                @click="deployVisible"
+                                @click="deployVisible(row)"
                             ></el-button>
                         </el-tooltip>
                     </template>
@@ -162,26 +162,23 @@
                     >
                 </span>
             </template>
-        </el-dialog>
-        <!-- 删除用户对话框 -->
-        <el-dialog title="删除用户" v-model="deleteDialogVisible" width="50%">
-            <span>这是一段信息</span>
-            <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="deleteDialogVisible = false"
-                        >取 消</el-button
-                    >
-                    <el-button
-                        type="primary"
-                        @click="deleteDialogVisible = false"
-                        >确 定</el-button
-                    >
-                </span>
-            </template>
-        </el-dialog>
-        <!-- 设置用户对话框 -->
-        <el-dialog title="设置用户" v-model="deployDialogVisible" width="50%">
-            <span>这是一段信息</span>
+        </el-dialog>     
+        <!-- 分配角色对话框 -->
+        <el-dialog title="分配角色" v-model="deployDialogVisible" width="50%" @close="deployRoleClose">
+            <div>
+                <p>当前的用户名：{{userInfo.username}}</p>
+                <p>当前的角色是：{{userInfo.role_name}}</p>
+                <p>分配新角色：
+                    <el-select v-model="selectedRolesId" placeholder="请选择">
+                        <el-option
+                        v-for="item in RolesList"
+                        :key="item.id"
+                        :label="item.roleName"
+                        :value="item.id">
+                        </el-option>
+                    </el-select>
+                </p>
+            </div>
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="deployDialogVisible = false"
@@ -189,7 +186,7 @@
                     >
                     <el-button
                         type="primary"
-                        @click="deployDialogVisible = false"
+                        @click="deployRole"
                         >确 定</el-button
                     >
                 </span>
@@ -199,6 +196,7 @@
 </template>
 
 <script>
+import RolesVue from '../power/Roles.vue'
 export default {
     data() {
         return {
@@ -206,7 +204,7 @@ export default {
             queryInfo: {
                 query: "",
                 pagenum: 1,
-                pagesize: 2,
+                pagesize: 5,
             },
             userList: [],
             total: 0,
@@ -305,7 +303,10 @@ export default {
                     },
                 ],
             },
-            deployDialogVisible: false,
+            deployDialogVisible: false,            
+            userInfo:{},//需分配角色的用户信息
+            RolesList:[],
+            selectedRolesId:"",
         }
     },
     created() {
@@ -319,7 +320,7 @@ export default {
             })
 
             if (res.meta.status !== 200) {
-                return this.$message.error(res.meta.msg)
+                return this.$message.error("获取菜单列表失败")
             }
 
             this.userList = res.data.users
@@ -379,7 +380,7 @@ export default {
             if (res.meta.status !== 200) {
                 return this.$message.error("查询出错啦")
             }
-            console.log(res.data)
+            // console.log(res.data)
             this.modifyForm = res.data
             this.modifyDialogVisible = true
         },
@@ -442,10 +443,31 @@ export default {
             this.$message.success(res.meta.msg)
             this.getUserList()
         },
-
-        deployVisible() {
+        async deployVisible(userInfo) {
+            this.userInfo=userInfo //存储用户信息备用
+             const { data: res } = await this.$http.get(`roles`)
+            if (res.meta.status !== 200) {
+                return this.$message.error("获取角色列表失败")
+            }
+            this.RolesList=res.data
+            // console.log(res.data) 
             this.deployDialogVisible = true
         },
+        //分配角色对话框关闭复位
+        deployRoleClose(){
+            this.selectedRolesId=[]            
+        },
+        //点击确认按钮，分配角色
+        async deployRole(){
+            if(!this.selectedRolesId){return this.$message.error('请选择要分配的角色')}
+             const { data: res } = await this.$http.put(`users/${this.userInfo.id}/role`,{rid:this.selectedRolesId})
+            if (res.meta.status !== 200) {
+                return this.$message.error("分配角色失败")
+            }
+            this.$message.success(res.meta.msg) //成功提示 
+            this.getUserList()
+            this.deployDialogVisible = false
+        }
     },
 }
 </script>
