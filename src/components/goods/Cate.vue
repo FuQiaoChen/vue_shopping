@@ -22,6 +22,7 @@
                 :props="defaultProps"
                 node-key="id"
                 @node-click="handleNodeClick"
+                :expand-on-click-node="false"
             >
                 <template #default="{ node, data }">
                     <span
@@ -65,14 +66,14 @@
                                 size="mini"
                                 type="primary"
                                 icon="el-icon-edit"
-                                @click="append(data)"
+                                @click="showModifyCate(data)"
                                 >编辑</el-button
                             >
                             <el-button
                                 size="mini"
                                 type="danger"
                                 icon="el-icon-delete"
-                                @click="remove(node, data)"
+                                @click="deleteCateById(node, data)"
                                 >删除</el-button
                             >
                         </span>
@@ -127,7 +128,30 @@
             </template>
         </el-dialog>
         <!-- 编辑分类对话框 -->
-        
+        <el-dialog
+            title="编辑分类"
+            v-model="modifyCateDialogVisible"
+            width="50%"
+            @close="modifyCateClose"
+        >
+            <!-- 添加表单 -->
+            <el-form
+                :model="modifyCateForm"
+                :rules="modifyCateFormRules"
+                ref="modifyCateFormRef"
+                label-width="100px"
+            >
+                <el-form-item label="分类名称：" prop="cat_name">
+                    <el-input v-model="modifyCateForm.cat_name"></el-input>
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <span class="dialog-footer">
+                    <el-button @click="modifyCateDialogVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="modifyCate">确 定</el-button>
+                </span>
+            </template>
+        </el-dialog>
     </div>
 </template>
 
@@ -163,6 +187,18 @@ export default {
                 children: "children",
                 checkStrictly: true,
             },
+            modifyCateDialogVisible: false,
+            modifyCateForm: {cat_name: "", cat_pid: 0, cat_level: 0 },
+            modifyCateFormRules: {
+                cat_name: [
+                    {
+                        required: true,
+                        message: "请输入分类名称",
+                        trigger: "blur",
+                    },
+                ],
+            },
+            
         }
     },
     created() {
@@ -246,29 +282,68 @@ export default {
                 this.$message.success(res.meta.msg) //成功提示
                 this.getCateList() //刷新权限列表
                 this.addCateDialogVisible = false //关 闭弹窗
-            })           
+            })
         },
         // ----------------------------------
         handleNodeClick(data) {
             // console.log(data);
             this.cateCurrentData = data
         },
-        append(data) {
-            // console.log(data);
-            // const newChild = { id: id++, label: 'testtest', children: [] };
-            // if (!data.children) {
-            // data.children = []
-            // }
-            // data.children.push(newChild);
-            // this.data = [...this.data]
+        async showModifyCate(cateInfo) {            
+             const { data: res } = await this.$http.get(`categories/${cateInfo.cat_id}`)
+            if (res.meta.status !== 200) {
+                return this.$message.error("分类查询出错啦")                                
+            }
+            this.modifyCateForm =res.data
+           this.modifyCateDialogVisible = true 
         },
-        remove(node, data) {
+        modifyCateClose() {
+            this.$refs.modifyCateFormRef.resetFields()
+            this.modifyCateForm = {}
+        },
+        
+         modifyCate() {
+            this.$refs.modifyCateFormRef.validate(async (valid) => {
+                if (!valid) return
+                const { data: res } = await this.$http.put(
+                    "categories/" + this.modifyCateForm.cat_id,
+                    this.modifyCateForm
+                )
+                // console.log(this.modifyForm);
+                if (res.meta.status !== 200) {
+                    return this.$message.error("商品分类修改失败")
+                }
+                this.$message.success(res.meta.msg)
+                this.modifyCateDialogVisible = false
+                this.getCateList()
+            })
+        },
+        // ----------------------------------
+        deleteCate(node, data) {
             console.log(node, data)
-            // const parent = node.parent;
-            // const children = parent.data.children || parent.data;
-            // const index = children.findIndex(d => d.id === data.id);
-            // children.splice(index, 1);
-            // this.data = [...this.data]
+           
+        },
+        async deleteCateById(node,cateInfo) {
+            const result = await this.$confirm(
+                "此操作将永久删除该用户, 是否继续?",
+                "提示",
+                {
+                    confirmButtonText: "确定",
+                    cancelButtonText: "取消",
+                    type: "warning",
+                }
+            ).catch((err) => err)
+            if (result !== "confirm") {
+                return this.$message("已取消删除")
+            }
+            const { data: res } = await this.$http.delete(
+                "categories/" + cateInfo.cat_id
+            )
+            if (res.meta.status !== 200) {
+                return this.$message.error("删除失败")
+            }
+            this.$message.success(res.meta.msg)
+            this.getCateList()
         },
     },
 }
