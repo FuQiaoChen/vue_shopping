@@ -39,7 +39,7 @@
                         @click="addDialogVisible = true"
                         >添加动态参数</el-button
                     >
-                    <el-table :data="manyTabData" border stripe default-expand-all>
+                    <el-table :data="manyTabData" border stripe >
                         <el-table-column type="expand">
                             <template #="{ row }">
                                 <el-tag
@@ -89,7 +89,7 @@
                                     size="mini"
                                     type="danger"
                                     icon="el-icon-delete"
-                                    @click="deleteUserById(row)"
+                                    @click="deleteParamsById(row)"
                                     >删除</el-button
                                 >
                             </template>
@@ -154,7 +154,7 @@
                                     size="mini"
                                     type="danger"
                                     icon="el-icon-delete"
-                                    @click="deleteUserById(row)"
+                                    @click="deleteParamsById(row)"
                                     >删除</el-button
                                 >
                             </template>
@@ -273,6 +273,7 @@ export default {
                     },
                 ],
             },
+            expandRowKeys:[1]
         }
     },
     computed: {
@@ -419,9 +420,9 @@ export default {
                 this.getParamsData()
             })
         },
-        async deleteUserById(paramsInfo) {
+        async deleteParamsById(paramsInfo) {
             const result = await this.$confirm(
-                "此操作将永久删除该用户, 是否继续?",
+                "此操作将永久删除该参数, 是否继续?",
                 "提示",
                 {
                     confirmButtonText: "确定",
@@ -486,7 +487,7 @@ export default {
             row.attr_vals.splice(index,1)
             this.saveAttrVals(row)
 
-        }
+        },        
     },
 }
 </script>

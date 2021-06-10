@@ -52,9 +52,15 @@ const routes = [   //里面创建的都是每一个route实例，里面的数据
       },
         {
         path: '/goods',
-        name: 'Goods',
-        component: ()=>import(/* webpackChunkName:"goods" */'../components/goods/Goods.vue')
+        name: 'GoodsList',
+        component: ()=>import(/* webpackChunkName:"goods" */'../components/goods/GoodsList.vue')
       },
+        {
+        path: '/goods/add',
+        name: 'Add',
+        component: ()=>import(/* webpackChunkName:"goods" */'../components/goods/Add.vue')
+      },  
+        
     ]
   }
 ]
