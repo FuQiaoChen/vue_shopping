@@ -282,10 +282,12 @@ export default {
             defaultKeys: [],
             //将分配权限角色的id
             roleId: "",
+           
         }
-    },
+    }, 
     created() {
         this.getRolesList()
+        
     },
     methods: {
         async getRolesList() {

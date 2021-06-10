@@ -122,7 +122,7 @@
             </el-form>
             <template #footer>
                 <span class="dialog-footer">
-                    <el-button @click="dialogVisible = false">取 消</el-button>
+                    <el-button @click="addCateDialogVisible = false">取 消</el-button>
                     <el-button type="primary" @click="addCate">确 定</el-button>
                 </span>
             </template>
@@ -179,7 +179,7 @@ export default {
                 ],
             },
             ParentCateList: [],
-            selectedParentKey: [],
+            selectedParentKey: [],//级联选择框双向绑定到的数组
             cascaderProps: {
                 expandTrigger: "hover",
                 value: "cat_id",
