@@ -90,6 +90,7 @@
                         </el-upload>
                     </el-tab-pane >
                     <el-tab-pane label="商品内容" name="4" >
+                        <!-- // 2、放置wangeditor 标签 ref="editorDom"-->
                         <div ref="editorDom" style="text-align:left;"></div>
                         <el-button type="primary" class="btnAdd" @click="addFinish">添加商品</el-button>
                      </el-tab-pane>
@@ -108,12 +109,12 @@
 </template>
 
 <script>
-import Editor from 'wangeditor'
-import _ from 'lodash'    //loDash插件，作用是要深拷贝addForm,建议名称为“_”来接收
+import Editor from 'wangeditor' // 1、导入wangeditor
+import _ from 'lodash'    //导入loDash插件，作用是要深拷贝addForm,建议名称为“_”来接收
 export default {   
     data() {
         return {
-            editor:'',
+            editor:'',  // 3、初始化editor对象
             activeIndex: "0",
             addForm: {
                 goods_name: "",
@@ -231,6 +232,7 @@ export default {
             }
             this.cateList = res.data
         },
+        // 4、配置并创建editor对象
         createEditor(){
             this.editor=new Editor(this.$refs.editorDom);
             this.editor.config.height = 300;  //v4版本用config代替customConfig

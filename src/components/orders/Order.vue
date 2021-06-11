@@ -139,7 +139,7 @@
 </template>
 
 <script>
-import cityData from '../assets/cityData.json' 
+import cityData from '../../assets/cityData.json' 
 export default {
     data() {       
         return {
