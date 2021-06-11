@@ -59,7 +59,7 @@
                             size="mini"
                             type="primary"
                             icon="el-icon-edit"
-                            @click="modifyVisible(row)"
+                            @click="goModifypage"
                         ></el-button>
                         <el-button
                             size="mini"
@@ -124,6 +124,9 @@ export default {
         },
         goAddpage() {
             this.$router.push("/goods/add")
+        },
+        goModifypage() {
+            this.$router.push("/goods/modify")
         },
         // -----------------删除商品-------------------------------
         async deleteGoodsById(paramsInfo) {

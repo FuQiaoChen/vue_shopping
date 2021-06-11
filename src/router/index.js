@@ -59,17 +59,22 @@ const routes = [   //里面创建的都是每一个route实例，里面的数据
         path: '/goods/add',
         name: 'Add',
         component: ()=>import(/* webpackChunkName:"goods" */'../components/goods/Add.vue')
-      },  
+      },
+       {
+        path: '/goods/modify',
+        name: 'Modify',
+        component: ()=>import(/* webpackChunkName:"goods" */'../components/goods/Modify.vue')
+      }, 
         {
         path: '/orders',
         name: 'Orders',
         component: ()=>import(/* webpackChunkName:"Orders" */'../components/Orders.vue')
       },  
-      {
-        path: '/editor',
-        name: 'editor',
-        component: ()=>import(/* webpackChunkName:"Orders" */'../components/wangEditor/editorItem.vue')
-      },  
+      // {
+      //   path: '/editor',
+      //   name: 'editor',
+      //   component: ()=>import(/* webpackChunkName:"Orders" */'../components/wangEditor/editorItem.vue')
+      // },  
     ]
   }
 ]
