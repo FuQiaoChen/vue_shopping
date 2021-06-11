@@ -8,7 +8,7 @@
             <el-breadcrumb-item>商品管理</el-breadcrumb-item>
             <el-breadcrumb-item>添加商品</el-breadcrumb-item>
         </el-breadcrumb>
-        <el-cart>
+       <el-card>
             <el-alert
                 title="添加商品信息"
                 type="info"
@@ -33,7 +33,7 @@
             <el-form
                 :model="addForm"
                 :rules="addFormRules"
-                ref="ruleFormRef"
+                ref="addFormRef"
                 label-position="top"
             >
                 <el-tabs
@@ -89,11 +89,13 @@
                             <el-button size="small" type="primary">点击上传</el-button>
                         </el-upload>
                     </el-tab-pane >
-                    <el-tab-pane label="商品内容" name="4" >角色管理</el-tab-pane
-                    >
+                    <el-tab-pane label="商品内容" name="4" >
+                        <div ref="editorDom" style="text-align:left;"></div>
+                        <el-button type="primary" class="btnAdd" @click="addFinish">添加商品</el-button>
+                     </el-tab-pane>
                 </el-tabs>
             </el-form>
-        </el-cart>
+       </el-card>
     </div>
     <!-- 图片预览弹窗 -->
     <el-dialog
@@ -106,24 +108,33 @@
 </template>
 
 <script>
-export default {
+import Editor from 'wangeditor'
+import _ from 'lodash'    //loDash插件，作用是要深拷贝addForm,建议名称为“_”来接收
+export default {   
     data() {
         return {
+            editor:'',
             activeIndex: "0",
             addForm: {
                 goods_name: "",
                 goods_price: 0,
                 goods_weight: 0,
-                goods_number: 0,
+                goods_number: 1,
                 goods_cat: [],
                 pics:[],
-                goods_introduce:''
+                goods_introduce:``,
+                attrs:[]
             },
             addFormRules: {
                 goods_name: [
                     {
                         required: true,
-                        message: "请输入商品名称",
+                        message: "请输入商品名称，名称必须唯一，否则创建失败",
+                        trigger: "blur",
+                    },
+                    {
+                        min: 4,
+                        message: "长度最少为4字符",
                         trigger: "blur",
                     },
                 ],
@@ -133,6 +144,17 @@ export default {
                         message: "请输入商品价格",
                         trigger: "blur",
                     },
+                    {
+                        //用正则表达式自定义校验规则
+                        validator: function (rule, value, callback) {
+                            if (/(^[1-9]\d*.\d*$)|(^0.\d*$)|(^[1-9]\d*$)/.test(value) == false) {
+                                callback(new Error("必须为数字且结果不能为0"))
+                            } else {
+                                callback()
+                            }
+                        },
+                        trigger: "blur",
+                    },
                 ],
                 goods_weight: [
                     {
@@ -140,11 +162,31 @@ export default {
                         message: "请输入商品重量",
                         trigger: "blur",
                     },
+                    {                      
+                        validator: function (rule, value, callback) {
+                            if (/(^[1-9]\d*.\d*$)|(^0.\d*$)|(^[1-9]\d*$)/.test(value) == false) {
+                                callback(new Error("必须为数字且结果不能为0"))
+                            } else {
+                                callback()
+                            }
+                        },
+                        trigger: "blur",
+                    },
                 ],
                 goods_number: [
                     {
                         required: true,
                         message: "请输入商品数量",
+                        trigger: "blur",
+                    },
+                    {                      
+                        validator: function (rule, value, callback) {
+                            if (/^[1-9]\d*$/.test(value) == false) {
+                                callback(new Error("必须为整数且结果不能为0"))
+                            } else {
+                                callback()
+                            }
+                        },
                         trigger: "blur",
                     },
                 ],
@@ -155,10 +197,13 @@ export default {
                         trigger: "blur",
                     },
                 ],
+                pics:[],
+                goods_introduce:[]
+
             },
             cateList: [],
             cascaderProps: {
-                expandTrigger: "hover",
+                expandTrigger: "hover",//不同与2.x放在标签内
                 value: "cat_id",
                 label: "cat_name",
                 children: "children",
@@ -173,7 +218,10 @@ export default {
         }
     },
     created() {
-        this.getCateList()
+        this.getCateList()        
+    },
+    mounted(){
+        this.createEditor()
     },
     methods: {
         async getCateList() {
@@ -182,6 +230,19 @@ export default {
                 return this.$message.error("获取商品分类列表失败")
             }
             this.cateList = res.data
+        },
+        createEditor(){
+            this.editor=new Editor(this.$refs.editorDom);
+            this.editor.config.height = 300;  //v4版本用config代替customConfig
+            this.editor.config.placeholder = '请输入...';
+            this.editor.config.focus = false ;   //编辑器初始化时，默认会自动 focus 到编辑区域
+            this.editor.config.onchange=html=>{
+                // console.log('change 之后最新的 html:',html),
+                this.addForm.goods_introduce=html.replace(/<[^>]+>/g,"")//去掉html字符串中的所有标签元素
+                //  console.log(this.addForm.goods_introduce)
+                };// 获取最新的 html 内容
+            // this.editor.config.onblur =newHtml=>{console.log('onblur', newHtml)}
+            this.editor.create();          
         },
         //级联选择框变化触发方法
         CateChange() {
@@ -202,7 +263,7 @@ export default {
         },
         //通过判断activeIndex的值来请求动态或静态参数 并将attr_vals转化为数组
         async tabClick() {
-            console.log(this.activeIndex)
+            // console.log(this.activeIndex)
             if (this.activeIndex === "1") {
                 const { data: res } = await this.$http.get(
                     `categories/${this.addForm.goods_cat[2]}/attributes`,
@@ -211,7 +272,7 @@ export default {
                     }
                 )
                 if (res.meta.status !== 200) {
-                    return this.$message.error("获取参数列表失败")
+                    return this.$message.error("获取商品参数列表失败")
                 }
                 res.data.forEach((item) => {
                     item.attr_vals = item.attr_vals
@@ -229,13 +290,8 @@ export default {
                     }
                 )
                 if (res.meta.status !== 200) {
-                    return this.$message.error("获取参数列表失败")
-                }
-                res.data.forEach((item) => {
-                    item.attr_vals = item.attr_vals
-                        ? item.attr_vals.split(" ")
-                        : []
-                })
+                    return this.$message.error("获取静态属性列表失败")
+                }               
                 this.onlyTabData = res.data
             }
         },
@@ -257,8 +313,36 @@ export default {
             const picInfo={pic:response.data.tmp_path}
             this.addForm.pics.push(picInfo)
             // console.log(this.addForm)
-        }
-
+        },
+        //
+        addFinish(){          
+            this.$refs.addFormRef.validate(async (valid)=>{
+                if(!valid){return this.$message.error('请填写必要的表单顶')}
+                //把cat数组数据改为提交要求的子符串格式
+                const form=_.cloneDeep(this.addForm)  //把addForm深拷贝为form,否则会影响表单中的addForm数值
+                form.goods_cat=form.goods_cat.join(',')
+                                
+                // console.log(this.addForm.goods_cat);
+                //处理动态参数
+                this.manyTabData.forEach(item=>{
+                    const newInfo={attr_id:item.attr_id,attr_value:item.attr_vals.join(' ')}
+                    this.addForm.attrs.push(newInfo)
+                })
+                //处理静态属性
+                this.onlyTabData.forEach(item=>{
+                    const newInfo={attr_id:item.attr_id,attr_value:item.attr_vals}
+                    this.addForm.attrs.push(newInfo)
+                })
+                form.attrs=this.addForm.attrs
+                //提交商品，名称必须唯一
+                const {data:res}= await this.$http.post('goods',form)
+                 if (res.meta.status !== 201) {                   
+                    return this.$message.error(res.meta.msg)
+                }
+                this.$message.success(res.meta.msg)
+                this.$router.push('/goods')
+            })   
+        },
     },
 }
 </script>
@@ -278,5 +362,8 @@ export default {
 }
 .previewImg{
     width: 100%;
+}
+.btnAdd{
+     margin-top: 15px;
 }
 </style>
