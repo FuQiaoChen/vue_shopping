@@ -1,4 +1,10 @@
 {
-    "semi":false,        //取消最后项的分号
-    "singleQuote":true   //字符串双引号变单引号
+  "printWidth": 200,
+  "eslintIntegration": true,
+  "stylelintIntegration": true,
+  "tabWidth": 2,
+  "semi": false,
+  "singleQuote": true,
+  "bracketSpacing": true,
+  "arrowParens": "avoid"
 }
